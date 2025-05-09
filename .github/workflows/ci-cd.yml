@@ -1,0 +1,38 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main  # Runs on every push to the main branch
+  pull_request:
+    branches:
+      - main  # Runs on every PR to the main branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # You can change this depending on your environment
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.9  # Adjust to your version if necessary
+
+    - name: Install dependencies
+      run: |
+        python -m venv venv
+        . venv/bin/activate
+        pip install -r requirements.txt
+
+    - name: Run tests
+      run: |
+        . venv/bin/activate
+        pytest  # Or any other test framework you use
+
+    - name: Deploy
+      if: success()  # Only runs if the tests pass
+      run: |
+        echo "Deploying the application..."  # Replace with your deployment script
