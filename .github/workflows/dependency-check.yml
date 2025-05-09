@@ -27,7 +27,7 @@ jobs:
       - name: Download OWASP Dependency-Check
         run: |
           wget https://github.com/jeremylong/DependencyCheck/releases/download/v6.5.0/dependency-check-6.5.0-release.zip
-          unzip dependency-check-6.5.0-release.zip -d dependency-check
+          unzip dependency-check-6.5.0-release.zip
 
       - name: Run OWASP Dependency-Check
         run: |
