@@ -8,7 +8,8 @@ ENV PYTHONUNBUFFERED=1
 # Set working directory
 WORKDIR /usr/src/app
 
-# Install system dependencies and create non-root user\RUN apt-get update \
+# Install system dependencies and create non-root user
+RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        gcc \
        libpq-dev \
@@ -22,7 +23,10 @@ RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
 # Copy application code and set ownership to non-root user
-COPY . ./
+COPY app .
+COPY instance .
+COPY tests .
+COPY run.py ./
 RUN chown -R appuser:appuser /usr/src/app
 
 # Switch to non-root user
