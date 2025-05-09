@@ -1,0 +1,26 @@
+name: TruffleHog Negative Test Case
+
+on:
+  push:
+    branches:
+      - feature/trufflehog-negative-case
+
+jobs:
+  trufflehog-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run TruffleHog (with verification)
+        id: trufflehog
+        uses: trufflesecurity/trufflehog@main
+        with:
+          scanArguments: --only-verified
+
+      - name: Fail if secrets found
+        if: steps.trufflehog.outputs.found == 'true'
+        run: |
+          echo "❌ TruffleHog detected secrets!"
+          exit 1
