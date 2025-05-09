@@ -1,26 +1,25 @@
-name: TruffleHog Negative Test Case
+name: TruffleHog Negative Test
 
 on:
   push:
     branches:
-      - feature/trufflehog-negative-case
+      - feature/trufflehog-negative-case  # Ensure you have the correct branch
 
 jobs:
-  trufflehog-test:
+  trufflehog-scan:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout the repository
         uses: actions/checkout@v3
 
-      - name: Run TruffleHog (with verification)
-        id: trufflehog
-        uses: trufflesecurity/trufflehog@main
-        with:
-          scanArguments: --only-verified
+      - name: Fetch all branches and commits
+        run: git fetch --all
 
-      - name: Fail if secrets found
-        if: steps.trufflehog.outputs.found == 'true'
+      - name: Install TruffleHog
         run: |
-          echo "❌ TruffleHog detected secrets!"
-          exit 1
+          curl -sSL https://github.com/trufflesecurity/trufflehog/releases/download/v3.88.29/trufflehog-linux-amd64-3.88.29.tar.gz | tar xz
+          mv trufflehog-linux-amd64-3.88.29/trufflehog /usr/local/bin/trufflehog
+
+      - name: Run TruffleHog scan
+        run: trufflehog --json --no-progress --since commit <target-repository-url>
