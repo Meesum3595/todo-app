@@ -1,0 +1,22 @@
+# Ignore Python virtual environments
+venv/
+**/venv/
+*/venv/
+
+# Ignore Python bytecode cache files
+__pycache__/
+*.pyc
+
+# Ignore common vendor paths
+site-packages/
+pip/_vendor/
+pkg_resources/_vendor/
+setuptools/_vendor/
+
+# Ignore compiled files
+*.so
+*.dll
+*.pyd
+*.pyc
+*.pyo
+*.exe
