@@ -4,44 +4,40 @@ on:
   push:
     branches:
       - main
+      - 'feature/*'
   pull_request:
     branches:
       - main
+      - 'feature/*'
 
 jobs:
   sonarqube:
-    name: SonarQube Scan
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Set up JDK 11
-        uses: actions/setup-java@v2
-        with:
-          java-version: '11'
-          distribution: 'adoptopenjdk'
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
 
-      - name: Cache SonarQube dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar-${{ hashFiles('**/sonar-project.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-sonar-
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
 
-      - name: Run SonarQube analysis
-        uses: sonarsource/sonarcloud-github-action@v1
-        with:
-          organization: 'your-sonarcloud-organization'  # Replace with your SonarCloud organization name (if using SonarCloud)
-          token: ${{ secrets.SONARQUBE_TOKEN }}  # Uses the SonarQube token secret stored in GitHub Secrets
+    - name: Install dependencies
+      run: mvn clean install -DskipTests
 
-      - name: Quality Gate Check
-        run: |
-          curl -u ${{ secrets.SONARQUBE_TOKEN }} -X POST "https://sonarcloud.io/api/qualitygates/project_status?projectKey=your_project_key" \
-          | jq -r '.projectStatus.status'  # Replace 'your_project_key' with your actual SonarQube project key
-          if [ "$status" != "OK" ]; then
-            echo "SonarQube quality gate failed"
-            exit 1
-          fi
+    - name: SonarQube Scanner
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: mvn sonar:sonar \
+        -Dsonar.projectKey=Meesum3595_todo-app \
+        -Dsonar.host.url=https://sonarqube.yourdomain.com \
+        -Dsonar.login=${{ secrets.SONAR_TOKEN }}
