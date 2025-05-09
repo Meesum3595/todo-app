@@ -19,7 +19,10 @@ COPY requirements.txt .
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY . .
+COPY app .
+COPY instance .
+COPY tests .
+COPY run.py .
 
 # Expose port 5000 for Flask
 EXPOSE 5000
