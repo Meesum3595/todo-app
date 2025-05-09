@@ -1,25 +1,47 @@
-name: TruffleHog Negative Test
+name: TruffleHog Secret Scan
 
 on:
   push:
     branches:
-      - feature/trufflehog-negative-case  # Ensure you have the correct branch
+      - main
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
 
 jobs:
   trufflehog-scan:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout the repository
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Fetch all branches and commits
-        run: git fetch --all
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
 
-      - name: Install TruffleHog
+      - name: Install dependencies
         run: |
-          curl -sSL https://github.com/trufflesecurity/trufflehog/releases/download/v3.88.29/trufflehog-linux-amd64-3.88.29.tar.gz | tar xz
-          mv trufflehog-linux-amd64-3.88.29/trufflehog /usr/local/bin/trufflehog
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
 
-      - name: Run TruffleHog scan
-        run: trufflehog --json --no-progress --since commit <target-repository-url>
+      - name: Download TruffleHog Binary
+        run: |
+          curl -sSL https://github.com/trufflesecurity/trufflehog/releases/download/v3.88.29/trufflehog-linux-amd64-3.88.29.tar.gz -o trufflehog.tar.gz
+          tar -xvzf trufflehog.tar.gz
+          chmod +x trufflehog-linux-amd64
+          mv trufflehog-linux-amd64 /usr/local/bin/trufflehog
+
+      - name: Run TruffleHog Scan
+        run: |
+          trufflehog --version
+          trufflehog --json . > trufflehog-report.json
+
+      - name: Upload TruffleHog report
+        uses: actions/upload-artifact@v3
+        with:
+          name: trufflehog-report
+          path: trufflehog-report.json
