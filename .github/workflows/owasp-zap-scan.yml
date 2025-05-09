@@ -1,7 +1,7 @@
 name: Owasp Zap Scan 
 on:
   push:
-    branches: [main]
+    branches: [main,feature/owasp-zap-scan]
 
 jobs:
   security-scanning:
