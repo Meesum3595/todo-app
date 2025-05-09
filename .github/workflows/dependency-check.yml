@@ -39,13 +39,13 @@ jobs:
             --failOnCVSS 7
 
       - name: Upload Dependency-Check HTML report
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: dependency-check-report
           path: dependency-check-report/*.html
 
       - name: Upload Dependency-Check XML report
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: dependency-check-report-xml
           path: dependency-check-report/*.xml
