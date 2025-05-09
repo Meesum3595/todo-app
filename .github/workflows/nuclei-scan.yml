@@ -23,17 +23,16 @@ jobs:
           | grep "browser_download_url.*linux_amd64.zip" \
           | cut -d '"' -f 4 \
           | wget -i - -O nuclei.zip
-
           unzip nuclei.zip
           chmod +x nuclei
           sudo mv nuclei /usr/local/bin/
 
-      - name: Run Nuclei Scan
+      - name: Run CVE-specific Nuclei Scan
         run: |
-          echo "Running Nuclei scan on http://127.0.0.1:5000"
-          nuclei -u http://127.0.0.1:5000/ -severity low,medium,high,critical -o nuclei-results.txt
+          echo "Running CVE-specific Nuclei scan on http://127.0.0.1:5000"
+          nuclei -u http://127.0.0.1:5000 -t cves/ -severity low,medium,high,critical -v -o nuclei-cve-results.txt
 
-      - name: Display Nuclei Results
+      - name: Display CVE Scan Results
         run: |
-          echo "------ Nuclei Scan Results ------"
-          cat nuclei-results.txt
+          echo "------ CVE Scan Results ------"
+          cat nuclei-cve-results.txt
