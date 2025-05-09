@@ -1,0 +1,39 @@
+name: Docker Bench Security Scan
+
+on:
+  push:
+    branches:
+      - feature/docker-bench
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  docker_bench:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker image
+        run: |
+          docker build -t todo-app:latest .
+
+      - name: Run Docker Bench for Security
+        run: |
+          docker run \
+            --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            --name docker-bench-security \
+            docker/docker-bench-security
+
+      # Optionally fail on certain findings (exit code non-zero)
+      - name: Check for high-severity issues
+        run: |
+          if docker run --rm docker/docker-bench-security | grep -E "WARN|[1-9][0-9]* critical"; then
+            echo "High-severity issues found!" 
+            exit 1
+          fi
