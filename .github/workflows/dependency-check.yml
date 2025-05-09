@@ -31,13 +31,13 @@ jobs:
 
       - name: Run OWASP Dependency-Check
         run: |
-          # the zip unpacks into ./dependency-check/, so this path exists:
           ./dependency-check/bin/dependency-check.sh \
             --project "todo-app SCA scan" \
             --scan . \
             --format HTML \
             --out dependency-check-report \
-            --failOnCVSS 7
+            --failOnCVSS 7 \
+            --disableAssembly
 
       - name: Upload Dependency-Check HTML report
         uses: actions/upload-artifact@v4
