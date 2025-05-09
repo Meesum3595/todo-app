@@ -31,7 +31,7 @@ jobs:
       - name: Run Nuclei Scan
         run: |
           echo "Running Nuclei scan on http://your-app-url-here.com"
-          nuclei -u http://your-app-url-here.com -severity low,medium,high,critical -o nuclei-results.txt
+          nuclei -u http://http://127.0.0.1:5000/ -severity low,medium,high,critical -o nuclei-results.txt
 
       - name: Display Nuclei Results
         run: |
