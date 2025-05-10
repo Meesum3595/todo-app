@@ -30,9 +30,9 @@ jobs:
       - name: Run CVE-specific Nuclei Scan
         run: |
           echo "Running CVE-specific Nuclei scan on https://todo-app-tj1h.onrender.com "
-          nuclei -u https://todo-app-tj1h.onrender.com -t http/ -severity low,medium,high,critical -v -o nuclei-cve-results.txt
+          nuclei -u https://todo-app-tj1h.onrender.com -t vulnerabilities/web -severity low,medium,high,critical -v -o nuclei-results.txt
 
       - name: Display CVE Scan Results
         run: |
           echo "------ CVE Scan Results ------"
-          cat nuclei-cve-results.txt
+          cat nuclei-results.txt
