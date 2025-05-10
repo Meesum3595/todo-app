@@ -1,0 +1,47 @@
+name: Nuclei DAST Scan
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+      - 'feature/**'
+
+env:
+  TARGET: 
+
+jobs:
+  nuclei-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Nuclei
+        run: |
+          curl -s https://api.github.com/repos/projectdiscovery/nuclei/releases/latest \
+            | grep "browser_download_url.*linux_amd64.zip" \
+            | cut -d '"' -f 4 \
+            | wget -i - -O nuclei.zip
+          unzip nuclei.zip
+          chmod +x nuclei
+          sudo mv nuclei /usr/local/bin/
+
+      - name: Run Nuclei CVE Scan
+        run: |
+          echo "------ CVE Scan on $TARGET ------"
+          nuclei -u $TARGET \
+            -t cves/ \
+            -severity low,medium,high,critical \
+            -v
+
+      - name: Run Nuclei Vulnerability Scan
+        run: |
+          echo "------ Generic Vulnerability Scan on $TARGET ------"
+          nuclei -u $TARGET \
+            -t vulnerabilities/ \
+            -severity low,medium,high,critical \
+            -v

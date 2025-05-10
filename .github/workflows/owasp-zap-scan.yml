@@ -1,0 +1,27 @@
+name: Owasp Zap Scan 
+on:
+  push:
+    branches: [main,feature/owasp-zap-scan]
+
+jobs:
+  security-scanning:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t todo-app .
+
+      - name: Create network
+        run: docker network create zapnet
+
+      - name: Start todo on zapnet
+        run: docker run -d --name todo-container --network zapnet todo-app
+      - run: sleep 10
+
+      - name: ZAP Full Scan
+        uses: zaproxy/action-full-scan@v0.12.0
+        with:
+          target: 'http://http://127.0.0.1:5000/'
+          alert_on_risk: 3
+          fail_action: true

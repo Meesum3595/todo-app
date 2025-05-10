@@ -1,0 +1,39 @@
+name: Nuclei DAST Scan
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+      - 'feature/**'
+
+jobs:
+  nuclei-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Nuclei
+        run: |
+          curl -s https://api.github.com/repos/projectdiscovery/nuclei/releases/latest \
+          | grep "browser_download_url.*linux_amd64.zip" \
+          | cut -d '"' -f 4 \
+          | wget -i - -O nuclei.zip
+
+          unzip nuclei.zip
+          chmod +x nuclei
+          sudo mv nuclei /usr/local/bin/
+
+      - name: Run Nuclei Scan
+        run: |
+          echo "Running Nuclei scan on http://your-app-url-here.com"
+          nuclei -u http://http://127.0.0.1:5000/ -severity low,medium,high,critical -o nuclei-results.txt
+
+      - name: Display Nuclei Results
+        run: |
+          echo "------ Nuclei Scan Results ------"
+          cat nuclei-results.txt
