@@ -12,6 +12,7 @@ jobs:
 
     env:
       RENDER_SERVICE_ID: srv-d0f9ih6mcj7s73d70uag
+      RENDER_WORKSPACE_ID: ${{ secrets.RENDER_WORKSPACE_ID }}
       CI: true
 
     steps:
@@ -41,27 +42,32 @@ jobs:
           sudo mv cli_v1.1.0 /usr/local/bin/render
           render --version
 
-      - name: Set Render workspace
-        env:
-          RENDER_WORKSPACE_ID: ${{ secrets.RENDER_WORKSPACE_ID }}
-        run: |
-          render workspace set $RENDER_WORKSPACE_ID --output json --confirm
-
-      - name: Deploy to Render
+      - name: Trigger a new deploy
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
-          render deploys create $RENDER_SERVICE_ID --output json --confirm
+          render deploys create $RENDER_SERVICE_ID \
+            --workspace $RENDER_WORKSPACE_ID \
+            --output json \
+            --confirm
 
       - name: Tail live logs
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
-          render logs --resources $RENDER_SERVICE_ID --tail --output json --confirm
+          render logs \
+            --workspace $RENDER_WORKSPACE_ID \
+            --resources $RENDER_SERVICE_ID \
+            --tail \
+            --output json \
+            --confirm
 
       - name: Roll back on failure
         if: failure()
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
-          render services rollback $RENDER_SERVICE_ID --output json --confirm
+          render services rollback $RENDER_SERVICE_ID \
+            --workspace $RENDER_WORKSPACE_ID \
+            --output json \
+            --confirm
