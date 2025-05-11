@@ -1,3 +1,5 @@
+mkdir -p .github/workflows
+cat > .github/workflows/render.yml << 'EOF'
 # .github/workflows/render.yml
 name: Render CI/CD Pipeline
 
@@ -11,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Check out your code
+      # 1. Check out code
       - name: Check out repository
         uses: actions/checkout@v3
 
@@ -21,13 +23,13 @@ jobs:
         with:
           node-version: '16'
 
-      # 3. Install deps and build
+      # 3. Install dependencies & build
       - name: Install dependencies & build
         run: |
-          npm ci
+          npm install        # <- changed from `npm ci`
           npm run build
 
-      # 4. Install the Render CLI
+      # 4. Install Render CLI
       - name: Install Render CLI
         run: npm install -g @renderinc/cli
 
@@ -55,3 +57,4 @@ jobs:
         run: |
           render login --api-key $RENDER_API_KEY
           render services rollback srv-d0f9ih6mcj7s73d70uag --to previous
+EOF
