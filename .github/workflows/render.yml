@@ -15,53 +15,50 @@ jobs:
       CI: true
 
     steps:
-      # 1. Check out the repository
       - name: Check out code
         uses: actions/checkout@v3
 
-      # 2. Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '16'
 
-      # 3. Install dependencies
       - name: Install dependencies
         run: npm ci
 
-      # 4. Build (if defined)
       - name: Build (if you have a build script)
         run: |
           if grep -q '"build"' package.json; then
-            echo "🛠️  Running npm run build"
             npm run build
           else
             echo "⚠️  No build script—skipping"
           fi
 
-      # 5. Install Render CLI (v1.1.0)
-      - name: Install Render CLI
+      - name: Install Render CLI v1.1.0
         run: |
           curl -L https://github.com/render-oss/cli/releases/download/v1.1.0/cli_1.1.0_linux_amd64.zip -o render.zip
           unzip render.zip
           sudo mv cli_v1.1.0 /usr/local/bin/render
           render --version
 
-      # 6. Trigger a new deploy
+      - name: Set Render workspace
+        env:
+          RENDER_WORKSPACE_ID: ${{ secrets.RENDER_WORKSPACE_ID }}
+        run: |
+          render workspace set $RENDER_WORKSPACE_ID --output json --confirm
+
       - name: Deploy to Render
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
           render deploys create $RENDER_SERVICE_ID --output json --confirm
 
-      # 7. Stream live logs (non-interactive JSON)
-      - name: Tail Render logs
+      - name: Tail live logs
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
           render logs --resources $RENDER_SERVICE_ID --tail --output json --confirm
 
-      # 8. Roll back on failure (non-interactive JSON)
       - name: Roll back on failure
         if: failure()
         env:
