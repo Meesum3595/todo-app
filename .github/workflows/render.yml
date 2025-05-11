@@ -1,0 +1,57 @@
+# .github/workflows/render.yml
+name: Render CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - feature/render
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Check out your code
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      # 2. (Optional) Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      # 3. Install deps and build
+      - name: Install dependencies & build
+        run: |
+          npm ci
+          npm run build
+
+      # 4. Install the Render CLI
+      - name: Install Render CLI
+        run: npm install -g @renderinc/cli
+
+      # 5. Deploy to Render
+      - name: Deploy to Render
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          render login --api-key $RENDER_API_KEY
+          render services deploy srv-d0f9ih6mcj7s73d70uag
+
+      # 6. Stream the last 5m of logs
+      - name: Tail Render logs
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          render login --api-key $RENDER_API_KEY
+          render logs srv-d0f9ih6mcj7s73d70uag --tail --since 5m
+
+      # 7. Roll back automatically on failure
+      - name: Roll back on failure
+        if: failure()
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          render login --api-key $RENDER_API_KEY
+          render services rollback srv-d0f9ih6mcj7s73d70uag --to previous
