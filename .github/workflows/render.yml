@@ -1,7 +1,6 @@
 # .github/workflows/render.yml
 name: Render CI/CD Pipeline
 
-# Trigger this workflow on pushes to the feature/render branch
 on:
   push:
     branches:
@@ -22,17 +21,25 @@ jobs:
         with:
           node-version: '16'
 
-      # 3. Install dependencies & build
-      - name: Install dependencies & build
-        run: |
-          npm ci
-          npm run build
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: npm ci
 
-      # 4. Install the Render CLI
+      # 4. Build if “build” script exists
+      - name: Build (if defined)
+        run: |
+          if grep -q '"build"' package.json; then
+            echo "🛠️  Build script found, running npm run build"
+            npm run build
+          else
+            echo "⚠️  No build script defined, skipping build step"
+          fi
+
+      # 5. Install the Render CLI
       - name: Install Render CLI
         run: npm install -g @renderinc/cli
 
-      # 5. Deploy to Render
+      # 6. Deploy to Render
       - name: Deploy to Render
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
@@ -40,7 +47,7 @@ jobs:
           render login --api-key $RENDER_API_KEY
           render services deploy srv-d0f9ih6mcj7s73d70uag
 
-      # 6. Tail recent Render logs
+      # 7. Tail recent logs
       - name: Tail Render logs
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
@@ -48,7 +55,7 @@ jobs:
           render login --api-key $RENDER_API_KEY
           render logs srv-d0f9ih6mcj7s73d70uag --tail --since 5m
 
-      # 7. Roll back on failure
+      # 8. Roll back on failure
       - name: Roll back on failure
         if: failure()
         env:
