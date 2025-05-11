@@ -1,4 +1,3 @@
-# .github/workflows/render.yml
 name: Render CI/CD Pipeline
 
 on:
@@ -51,9 +50,9 @@ jobs:
         run: |
           render deploys create $RENDER_SERVICE_ID --output json --confirm
 
-      - name: Tail logs
+      - name: Fetch recent logs (no live tailing)
         run: |
-          render logs --resources $RENDER_SERVICE_ID --tail --output json
+          render logs --resources $RENDER_SERVICE_ID --limit 50 --output json --confirm
 
       - name: Roll back on failure
         if: failure()
