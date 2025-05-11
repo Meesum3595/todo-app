@@ -54,17 +54,17 @@ jobs:
         run: |
           render deploys create $RENDER_SERVICE_ID --output json --confirm
 
-      # 7. Stream live logs
+      # 7. Stream live logs (non-interactive JSON)
       - name: Tail Render logs
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
-          render logs --resources $RENDER_SERVICE_ID --tail --confirm
+          render logs --resources $RENDER_SERVICE_ID --tail --output json --confirm
 
-      # 8. Roll back on failure
+      # 8. Roll back on failure (non-interactive JSON)
       - name: Roll back on failure
         if: failure()
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
-          render services rollback $RENDER_SERVICE_ID --confirm
+          render services rollback $RENDER_SERVICE_ID --output json --confirm
