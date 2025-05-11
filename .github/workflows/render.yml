@@ -42,32 +42,22 @@ jobs:
           sudo mv cli_v1.1.0 /usr/local/bin/render
           render --version
 
-      - name: Trigger a new deploy
+      - name: Login & set workspace
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
-          render deploys create $RENDER_SERVICE_ID \
-            --workspace $RENDER_WORKSPACE_ID \
-            --output json \
-            --confirm
+          render login --api-key "$RENDER_API_KEY" --confirm
+          render workspace set "$RENDER_WORKSPACE_ID" --confirm
+
+      - name: Trigger a new deploy
+        run: |
+          render deploys create "$RENDER_SERVICE_ID" --confirm
 
       - name: Tail live logs
-        env:
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
-          render logs \
-            --workspace $RENDER_WORKSPACE_ID \
-            --resources $RENDER_SERVICE_ID \
-            --tail \
-            --output json \
-            --confirm
+          render logs --resources "$RENDER_SERVICE_ID" --tail --confirm
 
       - name: Roll back on failure
         if: failure()
-        env:
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
-          render services rollback $RENDER_SERVICE_ID \
-            --workspace $RENDER_WORKSPACE_ID \
-            --output json \
-            --confirm
+          render services rollback "$RENDER_SERVICE_ID" --confirm
