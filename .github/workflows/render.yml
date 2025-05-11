@@ -35,12 +35,14 @@ jobs:
             echo "⚠️  No build script defined, skipping build step"
           fi
 
-      # 5. Install the Render CLI via Homebrew
+      # 5. Install the Render CLI binary
       - name: Install Render CLI
         run: |
-          brew update
-          brew install render
-          render --version
+          echo "Downloading Render CLI..."
+          curl -L https://github.com/renderinc/cli/releases/latest/download/render-linux-amd64 -o render
+          chmod +x render
+          sudo mv render /usr/local/bin/render
+          echo "Installed Render CLI version: $(render --version)"
 
       # 6. Deploy to Render
       - name: Deploy to Render
