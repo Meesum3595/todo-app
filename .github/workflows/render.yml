@@ -11,9 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      # Set your Service ID here (or add it as a repo secret)
       RENDER_SERVICE_ID: srv-d0f9ih6mcj7s73d70uag
-      # Tell the CLI it’s running in CI
       CI: true
 
     steps:
@@ -31,8 +29,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # 4. Build (if you have a build script)
-      - name: Build (if defined)
+      # 4. Build (if defined)
+      - name: Build (if you have a build script)
         run: |
           if grep -q '"build"' package.json; then
             echo "🛠️  Running npm run build"
@@ -41,7 +39,7 @@ jobs:
             echo "⚠️  No build script—skipping"
           fi
 
-      # 5. Install Render CLI v1.1.0
+      # 5. Install Render CLI (v1.1.0)
       - name: Install Render CLI
         run: |
           curl -L https://github.com/render-oss/cli/releases/download/v1.1.0/cli_1.1.0_linux_amd64.zip -o render.zip
@@ -56,17 +54,17 @@ jobs:
         run: |
           render deploys create $RENDER_SERVICE_ID --output json --confirm
 
-      # 7. Tail the last 5 minutes of logs
+      # 7. Stream live logs
       - name: Tail Render logs
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
-          render logs $RENDER_SERVICE_ID --since 5m --confirm
+          render logs --resources $RENDER_SERVICE_ID --tail --confirm
 
-      # 8. On failure, roll back to the previous deploy
+      # 8. Roll back on failure
       - name: Roll back on failure
         if: failure()
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
-          render services rollback $RENDER_SERVICE_ID --to previous --confirm
+          render services rollback $RENDER_SERVICE_ID --confirm
