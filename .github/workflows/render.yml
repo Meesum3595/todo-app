@@ -35,17 +35,16 @@ jobs:
             echo "⚠️  No build script defined, skipping build step"
           fi
 
-      # 5. Install the Render CLI via Render’s official install script
+      # 5. Install the Render CLI and add to PATH
       - name: Install Render CLI
         run: |
           curl -fsSL https://cdn.render.com/cli/install.sh | bash
-          echo "CLI version: $(~/.render/bin/render --version)"
+          echo "${HOME}/.render/bin" >> $GITHUB_PATH
 
       # 6. Deploy to Render
       - name: Deploy to Render
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-          PATH: ${{ runner.tool_cache }}/render/bin:${{ env.PATH }}
         run: |
           render login --api-key $RENDER_API_KEY
           render services deploy srv-d0f9ih6mcj7s73d70uag
@@ -54,7 +53,6 @@ jobs:
       - name: Tail Render logs
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-          PATH: ${{ runner.tool_cache }}/render/bin:${{ env.PATH }}
         run: |
           render login --api-key $RENDER_API_KEY
           render logs srv-d0f9ih6mcj7s73d70uag --tail --since 5m
@@ -64,7 +62,6 @@ jobs:
         if: failure()
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-          PATH: ${{ runner.tool_cache }}/render/bin:${{ env.PATH }}
         run: |
           render login --api-key $RENDER_API_KEY
           render services rollback srv-d0f9ih6mcj7s73d70uag --to previous
